@@ -10,8 +10,8 @@ using ValasztasokWeb.Models;
 namespace ValasztasokWeb.Migrations
 {
     [DbContext(typeof(ValasztasDbContext))]
-    [Migration("20240925070212_sqlite.local_migration_155")]
-    partial class sqlitelocal_migration_155
+    [Migration("20240926064547_sqlite.local_migration_648")]
+    partial class sqlitelocal_migration_648
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

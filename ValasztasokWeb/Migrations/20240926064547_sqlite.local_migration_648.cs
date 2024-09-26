@@ -5,7 +5,7 @@
 namespace ValasztasokWeb.Migrations
 {
     /// <inheritdoc />
-    public partial class sqlitelocal_migration_155 : Migration
+    public partial class sqlitelocal_migration_648 : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)

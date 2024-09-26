@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.EntityFrameworkCore;
 using ValasztasokWeb.Models;
 
 namespace ValasztasokWeb.Pages
@@ -8,17 +9,18 @@ namespace ValasztasokWeb.Pages
     {
         public IWebHostEnvironment _env { get; set; }
         public ValasztasDbContext _con { get; set; }
-        public AdatokFeltolteseFajlbolModel(IWebHostEnvironment env, ValasztasDbContext con, IFormFile uploadFile)
+        public AdatokFeltolteseFajlbolModel(IWebHostEnvironment env, ValasztasDbContext con)
         {
             _env = env;
             _con = con;
-            UploadFile = uploadFile;
+            _con.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
         }
 
         [BindProperty]
         public IFormFile UploadFile { get; set; }
-        public void OnGet()
+        public IActionResult OnGet()
         {
+            return Page();
         }
 
         public async Task<IActionResult> OnPostAsync()
@@ -32,19 +34,36 @@ namespace ValasztasokWeb.Pages
             }
 
             StreamReader sr = new(UploadFilePath);
+			List<Part> p = new List<Part>();
+			while (!sr.EndOfStream)
+            {
+                var sor = sr.ReadLine();
+                var part = sor?.Split()[4];
+                
+                if (!_con.Partok.AsNoTracking().Select(x => x.RovidNev).Contains(part))
+                {
+                    Part ujPart = new();
+                    ujPart.RovidNev = part;
+                    p.Add(ujPart);
+                }
+            }
+            foreach (var item in p)
+            {
+                _con.Partok.Add(item);
+            }
+            sr.Close();
+			_con.SaveChanges();
+			sr = new(UploadFilePath);
             while (!sr.EndOfStream)
             {
                 var sor = sr.ReadLine();
                 var elemek = sor?.Split();
                 Jelolt ujJelolt = new();
-                Part ujPart = new();
                 ujJelolt.Kerulet = int.Parse(elemek[0]);
                 ujJelolt.SzavazatokSzama = int.Parse(elemek[1]);
                 ujJelolt.Nev = elemek[2] + " " + elemek[3];
-                ujPart.RovidNev = elemek[4];
-                ujJelolt.Part = ujPart;
+                ujJelolt.PartRovidNev = elemek[4];
                 _con.JeloltekListaja.Add(ujJelolt);
-                _con.Partok.Add(ujPart);
             }
             sr.Close();
             _con.SaveChanges();
