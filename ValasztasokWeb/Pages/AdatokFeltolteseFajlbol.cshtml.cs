@@ -13,15 +13,11 @@ namespace ValasztasokWeb.Pages
         {
             _env = env;
             _con = con;
-            _con.ChangeTracker.QueryTrackingBehavior = QueryTrackingBehavior.NoTracking;
         }
 
         [BindProperty]
         public IFormFile UploadFile { get; set; }
-        public IActionResult OnGet()
-        {
-            return Page();
-        }
+        public IActionResult OnGet() => Page();
 
         public async Task<IActionResult> OnPostAsync()
         {
@@ -34,25 +30,7 @@ namespace ValasztasokWeb.Pages
             }
 
             StreamReader sr = new(UploadFilePath);
-			List<Part> p = new List<Part>();
-			while (!sr.EndOfStream)
-            {
-                var sor = sr.ReadLine();
-                var part = sor?.Split()[4];
-                
-                if (!_con.Partok.AsNoTracking().Select(x => x.RovidNev).Contains(part))
-                {
-                    Part ujPart = new();
-                    ujPart.RovidNev = part;
-                    p.Add(ujPart);
-                }
-            }
-            foreach (var item in p)
-            {
-                _con.Partok.Add(item);
-            }
-            sr.Close();
-			_con.SaveChanges();
+			List<Part> p = _con.Partok.ToList();
 			sr = new(UploadFilePath);
             while (!sr.EndOfStream)
             {
@@ -63,7 +41,13 @@ namespace ValasztasokWeb.Pages
                 ujJelolt.SzavazatokSzama = int.Parse(elemek[1]);
                 ujJelolt.Nev = elemek[2] + " " + elemek[3];
                 ujJelolt.PartRovidNev = elemek[4];
+                if (!p.Select(x => x.RovidNev).Contains(elemek[4]))
+                {
+                    p.Add(new Part {RovidNev = elemek[4] });
+                    _con.Partok.Add(new Part { RovidNev = elemek[4] });
+                }
                 _con.JeloltekListaja.Add(ujJelolt);
+
             }
             sr.Close();
             _con.SaveChanges();

@@ -9,17 +9,18 @@ using ValasztasokWeb.Models;
 
 namespace ValasztasokWeb.Pages
 {
-    public class SzavazatokModel : PageModel
+    public class UjJeloltModel : PageModel
     {
         private readonly ValasztasokWeb.Models.ValasztasDbContext _context;
 
-        public SzavazatokModel(ValasztasokWeb.Models.ValasztasDbContext context)
+        public UjJeloltModel(ValasztasokWeb.Models.ValasztasDbContext context)
         {
             _context = context;
         }
 
         public IActionResult OnGet()
         {
+        ViewData["PartRovidNev"] = new SelectList(_context.Partok, "RovidNev", "RovidNev");
             return Page();
         }
 
